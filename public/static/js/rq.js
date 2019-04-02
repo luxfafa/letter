@@ -1,0 +1,30 @@
+// author 刘鑫
+// date   2017-05.19
+var searchApp = new Vue({el : "#search", data : {express : [{expressId:1,expressName:'顺丰',typeName:'shunfeng'}, {expressId:2,expressName:'圆通',typeName:'yuantong'}, {expressId:3,expressName:'中通',typeName:'zhongtong'}, {expressId:4,expressName:'国通',typeName:'guotongkuaidi'}, {expressId:5,expressName:'韵达',typeName:'yunda'}, {expressId:6,expressName:'京东',typeName:'jd'}, {expressId:7,expressName:'EMS',typeName:'ems'}, {expressId:8,expressName:'天天',typeName:'tiantian'}, {expressId:9,expressName:'全峰',typeName:'quanfengkuaidi'}, {expressId:10,expressName:'快捷',typeName:'kuaijiesudi'}, {expressId:11,expressName:'优速',typeName:'youshuwuliu'}, {expressId:12,expressName:'百世',typeName:'baishiwuliu'}, {expressId:13,expressName:'宅急送',typeName:'zhaijisong'}, {expressId:14,expressName:'邮政快递(国内)|挂号信',typeName:'youzhengguonei'}, {expressId:15,expressName:'安能物流',typeName:'annengwuliu'}, {expressId:16,expressName:'奔腾物流',typeName:'benteng'}, {expressId:17,expressName:'能达速递',typeName:'ganzhongnengda'}, {expressId:18,expressName:'安鲜达',typeName:'exfresh'}, {expressId:19,expressName:'通和天下',typeName:'tonghetianxia'}, {expressId:20,expressName:'万象物流',typeName:'wanxiangwuliu'}, {expressId:21,expressName:'COE',typeName:'COE'}, {expressId:22,expressName:'民航快递',typeName:'minghangkuaidi'}, {expressId:23,expressName:'邮政国际',typeName:'youzhengguoji'}, {expressId:24,expressName:'苏宁物流',typeName:'suning'}, {expressId:25,expressName:'自动匹配中',typeName:'auto'}, ], rpViewApp : '', expressCode : null, expressType : 25 }, methods: {searchExpress : function() {var them = this; var expressCode = them.expressCode; if(!expressCode) {$(".weui-cell").eq(0).addClass("weui-cell_warn"); return false; } if(expressCode.length<6) {$(".weui-cell").eq(0).addClass("weui-cell_warn"); return false; } $('#loadingToast').show(); if($('.weui-cell').eq(0).attr('class').split(" ").length>1) {$('.weui-cell').eq(0).removeClass("weui-cell_warn"); } var expressType = them.expressType; var rqObj = {'expressCode' : expressCode, 'expressType' : expressType }; rqData = them.postData(rqObj); xhttp = new XMLHttpRequest(); xhttp.onreadystatechange = callback; xhttp.open("POST", "/index/express/query", true); xhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded"); xhttp.send(rqData); function callback() {if(xhttp.readyState == 4 && xhttp.status == 200) {var rp = JSON.parse(xhttp.responseText); if(rp.isEpCode) {if(rp.status==200) { them.autoComNum(rp.com);var j = [rp]; if(typeof(them.rpViewApp) == 'object') {them.rpViewApp.rpData = j; $('#loadingToast').hide(); return false; } else {$("#rpView").show(); them.rpViewApp = new Vue({el : "#rpView", data : {rpData : j }, methods : {switchcdin : function(x) {if($('.elsnum').eq(x).find('.weui-cell').eq(1).css('display')=='none') {$('.elsnum').eq(x).find('.weui-cell').show(); } else {$('.elsnum').eq(x).find('.weui-cell').eq(0).siblings().hide(); } } } }) } } else {if(rp.msg) {them.showDialog(rp.msg); } else {them.showDialog('查询失败'); } } } else if (rp.isPhone) {if(rp.num==1) {rp.list[0].ep_info.company = '('+rp.list[0].epcompany+')'; var prp = rp.list[0].ep_info; if(prp.status==200) {them.autoComNum(prp.com); var d = [prp]; if(typeof(them.rpViewApp) == 'object') {them.rpViewApp.rpData = d; $('#loadingToast').hide(); return false; } else {$("#rpView").show(); them.rpViewApp = new Vue({el : "#rpView", data : {rpData : d, listNum : rp.num }, methods : {switchcdin : function(x) {if($('.elsnum').eq(x).find('.weui-cell').eq(1).css('display')=='none') {$('.elsnum').eq(x).find('.weui-cell').show(); } else {$('.elsnum').eq(x).find('.weui-cell').eq(0).siblings().hide(); } } } }) } } else {if(prp.msg) {them.showDialog(prp.msg); } else {them.showDialog('查询失败'); } } } else if(rp.num > 1) {var prp = rp.list; var g = []; var s = []; for (z in prp) {if(prp[z].ep_info.status==200) {prp[z].ep_info.company = '('+prp[z].epcompany+')'; g.push(prp[z].ep_info); s.push(z); } }; if(typeof(them.rpViewApp) == 'object') {them.rpViewApp.rpData = g; them.rpViewApp.listNum = rp.num; them.rpViewApp.cdin = s; $('#loadingToast').hide(); return false; } else {$("#rpView").show(); them.rpViewApp = new Vue({el : "#rpView", data : {rpData : g, listNum : rp.num, cdin : s }, methods : {switchcdin : function(x) {if($('.elsnum').eq(x).find('.weui-cell').eq(1).css('display')=='none') {$('.elsnum').eq(x).find('.weui-cell').show(); } else {$('.elsnum').eq(x).find('.weui-cell').eq(0).siblings().hide(); } } } }) } } } else {them.showDialog(rp.msg); } $('#loadingToast').hide(); } } }, postData : function(obj) {var str = ""; var i = 0; for(var prop in obj){if(i==1) {str += prop + "=" + obj[prop] } else if (i==0) {str += prop + "=" + obj[prop] + "&"} i++; } return str; }, autoComNum : function(autoType) {var themE = this.express; for (z in themE) {if(autoType==themE[z].typeName) {this.expressType = themE[z].expressId; return; } }; }, showDialog : function(msg,btnname='确定',href='#') {$('#text_dialog').text(msg); $('#dialogbtn').text(btnname);$('#dialogbtn').attr('href',href); $('#dialog').fadeIn(200); } } }); $(document).ready(function(){$('#dialog').on('click', '.weui-dialog__btn', function(){$(this).parents('.js_dialog').fadeOut(200); }); })
+
+if(!getCookie('hasee_m')) {
+    setCookie('hasee_m','whoops','s120');
+    searchApp.showDialog('作者唯一微信LX6868886,有外部网站盗用了我的网站源码用来贩卖,十分可耻,如有需要请联系本人微信,价格低于市场价!','确定','javascript:;');
+}
+function getsec(str){
+    var str1=str.substring(1,str.length)*1; 
+    var str2=str.substring(0,1); 
+    if (str2=="s"){
+       return str1*1000;
+    }else if (str2=="h"){
+       return str1*60*60*1000;
+    }else if (str2=="d"){
+       return str1*24*60*60*1000;
+    }
+}
+function setCookie(name,value,time){
+    var strsec = getsec(time);
+    var exp = new Date();
+    exp.setTime(exp.getTime() + strsec*1);
+    document.cookie = name + "="+ escape (value) + ";expires=" + exp.toGMTString();
+}
+function getCookie(name) {
+    var arr,reg=new RegExp("(^| )"+name+"=([^;]*)(;|$)");
+    if(arr=document.cookie.match(reg)) return unescape(arr[2]);
+    return null;
+}

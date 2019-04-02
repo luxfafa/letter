@@ -1,0 +1,5 @@
+.clear{height: 15px;width: 100%;clear: both}
+#lx_top_menu{z-index:1999;position: fixed;top:63px;right:18px;background:#fff;width: 120px;text-align:center;}
+.mc_a{display: block;font-size: 16px;height:30px;line-height: 30px}
+.mc_a:hover{background:#000;opacity: 0.6;color:#fff;-webkit-transition: width .5s;transition: color .3s;-webkit-transition: color .3s;}
+#lx_top_menu{display: none}
